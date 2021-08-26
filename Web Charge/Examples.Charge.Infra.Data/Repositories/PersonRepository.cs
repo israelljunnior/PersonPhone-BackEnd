@@ -1,8 +1,10 @@
 ﻿using Examples.Charge.Domain.Aggregates.PersonAggregate;
 using Examples.Charge.Domain.Aggregates.PersonAggregate.Interfaces;
 using Examples.Charge.Infra.Data.Context;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Examples.Charge.Infra.Data.Repositories
@@ -15,7 +17,16 @@ namespace Examples.Charge.Infra.Data.Repositories
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
+        public async Task<IEnumerable<Person>> FindAllAsync() => await Task.Run(() => _context.Person.Include(x => x.Phones).ToListAsync());
+        public async Task<Person> FindByIdAsync(int businessEntityID) => await Task.Run(() => _context.Person.Include(x => x.Phones).FirstOrDefaultAsync(x => x.BusinessEntityID == businessEntityID));
+        public async Task<Person> SaveAsync(Person person)
+        {
+            await Task.Run(() => {
+                _context.Person.Add(person);
+                _context.SaveChangesAsync();
+            });
 
-        public async Task<IEnumerable<Person>> FindAllAsync() => await Task.Run(() => _context.Person);
+            return person;
+        }
     }
 }

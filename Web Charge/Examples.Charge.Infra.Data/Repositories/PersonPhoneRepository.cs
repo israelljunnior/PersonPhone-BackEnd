@@ -4,6 +4,8 @@ using Examples.Charge.Infra.Data.Context;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Examples.Charge.Infra.Data.Repositories
 {
@@ -17,5 +19,25 @@ namespace Examples.Charge.Infra.Data.Repositories
         }
 
         public async Task<IEnumerable<PersonPhone>> FindAllAsync() => await Task.Run(() => _context.PersonPhone);
+
+        public async Task<PersonPhone> FindByIdAsync(string PhoneNumber) => await Task
+                .Run(() =>_context.PersonPhone.Include(x => x.PhoneNumberType).FirstOrDefault(x => x.PhoneNumber == PhoneNumber ));
+
+        public async Task<PersonPhone> SaveAsync(PersonPhone personPhone)
+        {
+           await Task.Run(() => {
+                _context.PersonPhone.AddAsync(personPhone);
+                _context.SaveChangesAsync();
+           });
+
+            return personPhone;
+        }
+        public async void Delete(PersonPhone personPhone)
+        {
+            await Task.Run(() => {
+                _context.PersonPhone.Remove(personPhone);
+                _context.SaveChangesAsync();
+            });
+        }
     }
 }
